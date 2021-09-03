@@ -63,7 +63,7 @@ GetCurrentRunningStreak <-  function(activity_list, name){
 }
 
 PlotLast16Weeks <-  function(final_dt, type = 'distance'){
-  dataplot <- final_dt[,.(distance = sum(distance), moving_time = sum(moving_time), suffer_score = sum(suffer_score)),.(Week = FiscalWeekEndDate(start_date), activity_type)]
+  dataplot <- final_dt[,.(distance = sum(distance), moving_time = sum(moving_time), suffer_score = sum(suffer_score)),.(Week = lubridate::ceiling_date(start_date), activity_type)]
   plot <- ggplot(dataplot[Week >= today() - 16*7]) + 
     geom_col(aes_string(x = 'Week', y = type, fill = 'activity_type')) + 
     labs(title = paste('Last 16 weeks', type), y = type, x = '')

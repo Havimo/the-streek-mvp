@@ -7,7 +7,7 @@ app_name <- 'AdrienAPI' # chosen by user
 app_client_id  <- '32141' # an integer, assigned by Strava
 app_secret <- '7fa0351b0424b4f166a109c311b087b3e6f25793' # an alphanumeric secret, assigned by Strava
 my_athlete_id <- 16473726
-google_key <- 'AIzaSyAME5ksEXiMTWC523vDmdJrjLdupg-hlqE'
+
 # create the authentication token
 stoken <- httr::config(token = strava_oauth(app_name, app_client_id, app_secret, app_scope="activity:read_all", cache = T))
 
