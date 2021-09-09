@@ -1,2 +1,5 @@
 .httr-oauth
 .Rproj.user/
+.Rhistory
+*.png
+*.rds

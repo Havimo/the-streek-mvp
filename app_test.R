@@ -24,7 +24,7 @@ server <- function(input, output,session) {
   
   appURL <- reactive({
     
-    if (!is.null(session)) {
+    if(!is.null(session)) {
       app_url <- paste0(session$clientData$url_protocol,
                         "//",
                         session$clientData$url_hostname, 

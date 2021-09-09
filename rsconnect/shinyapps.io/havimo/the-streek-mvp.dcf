@@ -1,0 +1,14 @@
+name: the-streek-mvp
+title: the-streek-mvp
+username:
+account: havimo
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 4619334
+bundleId: 5015632
+url: https://havimo.shinyapps.io/the-streek-mvp/
+when: 1631189482.76875
+lastSyncTime: 1631189482.76875
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: activity.rds|app_test.R|auth_lib.R|strava.R|user.jpg

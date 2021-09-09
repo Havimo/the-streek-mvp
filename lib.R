@@ -1,6 +1,11 @@
-GetAndFormatActivityList <- function(stoken){
-  cat('Downloading activity list....')
-  my_acts <- get_activity_list(stoken)
+GetAndFormatActivityList <- function(stoken, from_cache){
+  if(from_cache){
+    load('activity.rds')
+  } else {
+    cat('Downloading activity list....')
+    my_acts <- get_activity_list(stoken)
+    save(my_acts, file = 'activity.rds')
+  }
   
   
   final_dt <- rbindlist(lapply(my_acts,function(x) as.data.table(t(unlist(x)))), use.names = TRUE, fill = TRUE)
@@ -45,19 +50,25 @@ GetCurrentRunningStreak <-  function(activity_list, name){
   
   max_streak <-  max(streak_dt$streak_length)
   
+  string <- ''
+  
   if(ran_yesterday){
 
     current_streak <-  streak_dt[start_date == today() - 1]$streak_length + (ran_today * 1)
-    string <-  paste("Your current streak is", current_streak, 'days!')
+    string <-  paste("Your current streek is", current_streak, 'days!')
     if(ran_today) string <- paste(string, "You're all set for today, get some rest",name,".")
     if(!ran_today) string <- paste(string, "You still need to run today, get out there",name,"!")
   }
   
-  if(!ran_yesterday & !ran_today){
-    string <- "You're not on a streak currently."
+  if(!ran_yesterday & ran_today){
+    string <- paste0("You ran today ",name,", and have begun a new streek!")
   }
   
-  string <- paste(string, "\n Your longest streak is", max_streak, "days.")
+  if(!ran_yesterday & !ran_today){
+    string <- paste0("You're not on a streek currently. Get out there",name,"!")
+  }
+  
+  string <- paste(string, "\n Your longest streek is", max_streak, "days.")
   
   return(string)
 }
