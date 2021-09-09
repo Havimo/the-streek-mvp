@@ -9,8 +9,10 @@ library(lubridate)
 library(ggplot2)
 
 
-#logins and metadata
-app_name <- 'AdrienAPI' # chosen by user
-app_client_id  <- '32141' # an integer, assigned by Strava
-app_secret <- '7fa0351b0424b4f166a109c311b087b3e6f25793' # an alphanumeric secret, assigned by Strava
+#global variables
+APP_NAME <- 'AdrienAPI' # chosen by user
+APP_CLIENT_ID  <- '32141' # an integer, assigned by Strava
+APP_SECRET <- '7fa0351b0424b4f166a109c311b087b3e6f25793' # an alphanumeric secret, assigned by Strava
+# APP_URL <- 'https://havimo.shinyapps.io/the-streek/'
+# APP_URL <- 'http://127.0.0.1:6831'
 

@@ -9,17 +9,11 @@
 
 source('param.R')
 source('lib.R')
+source('auth_lib.R')
 
 thematic::thematic_shiny(font = 'auto')
 
-# if (interactive()) {
-#   # testing url
-#   options(shiny.port = 8100)
-#   APP_URL <- "http://localhost:8100/"
-# } else {
-#   # deployed URL
-#   APP_URL <- "https://havimo.shinyapps.io/the-streek/"
-# }
+
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -33,6 +27,7 @@ ui <- fluidPage(
     # Sidebar with a slider input for number of bins 
     sidebarLayout(
         sidebarPanel(
+          # uiOutput("authUI")
           actionButton("connectStrava","Connect to Strava")
         ),
         # Show a plot of the generated distribution
@@ -45,31 +40,35 @@ ui <- fluidPage(
         )
     )
 )
-server <- function(input, output) {
-  observeEvent(input$connectStrava,{
-      # strava_app <- oauth_app(appname = app_name,
-      #   key = app_client_id,
-      #   secret = app_secret,
-      #   redirect_uri = APP_URL
-      # )
-      # strava_endpoint <- oauth_endpoint(request = "https://www.strava.com/oauth/authorize?", 
-      #                       authorize = "https://www.strava.com/oauth/authorize", 
-      #                       access = "https://www.strava.com/oauth/token")
-      # stoken <- oauth2.0_token(endpoint = strava_endpoint, app = strava_app, scope =  "activity:read_all", cache = F)
-      stoken <- httr::config(token = strava_oauth(app_name, app_client_id, app_secret, app_scope = "activity:read_all", cache = F))
-      #stoken <- httr::config(token = readRDS('.httr-oauth')[[1]])
-      values <- reactiveValues(myinfo = get_athlete(stoken),
-                               activity_list = GetAndFormatActivityList(stoken))
-  
-      output$userImg <- renderUI({
-          image <- values$myinfo$profile
-          print(image)
-          tags$img(src=image, width = 136, height = 136)
-      })
-      output$currentStreak <- renderText(GetCurrentRunningStreak(values$activity_list, values$myinfo$firstname))
-      
-      output$last_16_weeks <- renderPlot(PlotLast16Weeks(values$activity_list,input$plot_type_picker))
-  })
+server <- function(input, output, session) {
+    # output$authUI <- renderUI({
+    #   if (is.null(get_authorisation_code(session))) {
+    #     a('-> To view your activities, click here to authorise access to your Strava data <-',
+    #       href=paste0('https://www.strava.com/oauth/authorize?client_id=',APP_CLIENT_ID,'&response_type=code&redirect_uri=',APP_URL,'&approval_prompt=auto&state='))
+    #   }
+    # })
+    observeEvent(input$connectStrava,{
+        # stoken <-  get_stoken(session)
+        # stoken <- httr::config(token = strava_oauth(APP_NAME, APP_CLIENT_ID, APP_SECRET, app_scope = "activity:read_all", cache = F))
+        cat('generating token with callback uri ', get_shiny_url(session), '\n')
+        strava_app <- oauth_app(appname = APP_NAME, key = APP_CLIENT_ID,secret = APP_SECRET, redirect_uri = get_shiny_url(session))
+        strava_end <- oauth_endpoint(request = "https://www.strava.com/oauth/authorize?",
+                                     authorize = "https://www.strava.com/oauth/authorize",
+                                     access = "https://www.strava.com/oauth/token")
+        stoken <-  httr::config(token = oauth2.0_token(endpoint = strava_end, app = strava_app, scope = "activity:read_all", cache = F))
+        cat('auth success!','\n')
+        values <- reactiveValues(myinfo = get_athlete(stoken),
+                                 activity_list = GetAndFormatActivityList(stoken))
+
+        output$userImg <- renderUI({
+            image <- values$myinfo$profile
+            print(image)
+            tags$img(src=image, width = 136, height = 136)
+        })
+        output$currentStreak <- renderText(GetCurrentRunningStreak(values$activity_list, values$myinfo$firstname))
+
+        output$last_16_weeks <- renderPlot(PlotLast16Weeks(values$activity_list,input$plot_type_picker))
+    })
 }
 
 # Run the application 
