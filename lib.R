@@ -28,8 +28,8 @@ GetAndFormatActivityList <- function(stoken, from_cache){
   return(final_dt)
 }
 
-GetCurrentRunningStreak <-  function(activity_list, name){
-  streak_dt <- activity_list[activity_type == 'Run',.N,.(start_date)]
+GetRunningStreakData <-  function(activity_list,streek_type = 'Run'){
+  streak_dt <- activity_list[activity_type == streek_type,.N,.(start_date)]
   
   if(nrow(streak_dt[start_date == today()]) == 0) {
     ran_today <- FALSE
@@ -49,26 +49,34 @@ GetCurrentRunningStreak <-  function(activity_list, name){
   streak_dt[is.na(streaking) | streaking != 1, streak_length := 0]
   
   max_streak <-  max(streak_dt$streak_length)
+  current_streak <-  streak_dt[start_date == today() - 1]$streak_length + (ran_today * 1)
   
+  return(list(data = data.table(streek_type = streek_type,
+                    current_streek_value = current_streak,
+                    max_streek_value = max_streak),
+              ran_today,
+              ran_yesterday))
+}
+  
+GetCurrentRunningStreak <-  function(activity_list, name){
+  streak_dt <- GetRunningStreakData(activity_list,'Run')
   string <- ''
   
-  if(ran_yesterday){
-
-    current_streak <-  streak_dt[start_date == today() - 1]$streak_length + (ran_today * 1)
-    string <-  paste("Your current streek is", current_streak, 'days!')
+  if(streak_dt$ran_yesterday){
+    string <-  paste("Your current streek is", streak_dt$data$current_streek_value, 'days!')
     if(ran_today) string <- paste(string, "You're all set for today, get some rest",name,".")
     if(!ran_today) string <- paste(string, "You still need to run today, get out there",name,"!")
   }
   
-  if(!ran_yesterday & ran_today){
+  if(!streak_dt$ran_yesterday & streak_dt$ran_today){
     string <- paste0("You ran today ",name,", and have begun a new streek!")
   }
   
-  if(!ran_yesterday & !ran_today){
+  if(!streak_dt$ran_yesterday & !streak_dt$ran_today){
     string <- paste0("You're not on a streek currently. Get out there",name,"!")
   }
   
-  string <- paste(string, "\n Your longest streek is", max_streak, "days.")
+  string <- paste(string, "\n Your longest streek is", streak_dt$data$max_streek_value, "days.")
   
   return(string)
 }
